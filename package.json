@@ -1,0 +1,13 @@
+{
+	"name": "sockjs-proxy",
+	"version": "0.0.1",
+	"description": "route websocket like requests to backends",
+	"main": "index.js",
+	"author": "ShiningRay <tsowly@hotmail.com>",
+
+	"dependencies": {
+		"zmq": "",
+		"sockjs": ""
+	}
+
+}
