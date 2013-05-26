@@ -1,4 +1,4 @@
-var zmq = require('zmq'), sock = zmq.socket('push');
+var zmq = require('zmq'), sock = zmq.socket('push'), http = require('http'), sockjs = require('sockjs');
 
 
 sock.bindSync('tcp://127.0.0.1:3000');

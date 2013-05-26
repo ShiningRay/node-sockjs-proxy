@@ -3,13 +3,11 @@ require 'celluloid/zmq'
 
 Celluloid::ZMQ.init
 
-
-
 class Server
   include Celluloid::ZMQ
 
   def initialize(address)
-    @socket = PullSocket.new
+    @socket = RepSocket.new
 
     begin
       @socket.connect(address)
