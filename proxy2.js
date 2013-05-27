@@ -1,49 +1,29 @@
 var http = require('http'), sockjs = require('sockjs'), WebSocket= require('faye-websocket');
-
+var zmq = require('zmq');
 var backend = '127.0.0.1:8000';
 var endpoint = '/echo';
-var proxy = sockjs.createServer({log: function(a,b){console.log(b)}});
+var proxy = sockjs.createServer();
+var requestSocket = zmq.socket('router');
+var responseSocket = zmq.socket('dealer'); 
+requestSocket.bindSync('tcp://127.0.0.1:3000'); 
+responseSocket.bindSync('tcp://127.0.0.1:3001');
+var incomingConnections = {}
 proxy.on('connection', function(conn) {
   console.log(conn.headers);
   console.log(conn.url);
   console.log(conn.protocol);
-  var backendConn = new WebSocket.Client('ws://'+backend+endpoint);
-  var opened = false, queue = [];
-  console.log('incoming conn');
-  backendConn.on('open', function(){
-    opened = true;
-    if(queue.length > 0){
-      queue.forEach(function(i){
-        backendConn.send(i);
-      });
-      queue = [];
-    }
-  });
-  backendConn.on('error', function(){
-    // retry or failed
-  });
-  backendConn.on('close', function(){
-    console.log('backend close');
-    opened = false;
-    conn.close();
-  });
-  backendConn.on('message', function(event){
-    //console.log('server -> client', event.data);
-    conn.write(event.data);
-  });
+  var opened = false;
+
   conn.on('data', function(message) {
-    if(opened){
-      //console.log('client -> server', message);
-      backendConn.send(message);
-    }else{
-      queue.push(message);
-    }
+
   });
+
   conn.on('close', function() {
     if(opened){
       opened=false;
       backendConn.close();
     }
+    conn = null
   });
 });
 var server = http.createServer();
